@@ -27,7 +27,7 @@ function storeNewTransactionObject(text, value) {
   if (transactions.length === 0) {
     newTransactionId = 0;
   } else {
-    newTransactionId = transactions[transactions.length - 1] + 1;
+    newTransactionId = transactions[transactions.length - 1].id + 1;
   }
   const transaction = {
     id: newTransactionId,
@@ -72,12 +72,48 @@ function showAllTransactions() {
   );
 }
 
+// Show Ialance
+function showBalance() {
+  let balance = 0;
+  transactions.forEach((item) => {
+    balance += item.amount;
+  });
+  balanceElement.innerText = `$${balance}`;
+}
+
+// Show Income
+function showIncome() {
+  let income = 0;
+  transactions.forEach((item) => {
+    if (item.amount > 0) {
+      income += item.amount;
+    }
+  });
+  moneyIncomeElement.innerText = `$${income}`;
+}
+
+// Show Expense
+function showExpense() {
+  let expense = 0;
+  transactions.forEach((item) => {
+    if (item.amount < 0) {
+      expense += item.amount;
+    }
+  });
+  moneyExpenseElement.innerText = `$${expense}`;
+}
+
 // Update UI
 function updateUI() {
   showAllTransactions();
-  storeNewTransactionObject();
+  showBalance();
+  showIncome();
+  showExpense();
 }
 
 addTransactionBtnEl.addEventListener("click", () => {
+  storeNewTransactionObject();
   updateUI();
+  inputTextElement.value = ``;
+  inputAmountElement.value = ``;
 });
