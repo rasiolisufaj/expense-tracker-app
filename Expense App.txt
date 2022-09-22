@@ -1,0 +1,73 @@
+System Features: (System Analise)[Best if the solution fits clients needs]
+    1. Show Balance
+    2. Show Income
+    3. Show Expense
+    4. Show Transaction History (Id + Title + amount) 
+    5. Add new Transaction(Id + Title + amount)
+
+System Design:  (System Design)[Best if the solution stores less data]
+    1. Save all the transactions
+    2. To require Balance -> sum all the transactions.amount
+    3. To require Income -> sum all the postive transactions.amount
+    4. To require Expense -> sum all the negative transactions.amount
+    5. To add transaction -> get the user input, create transaction, add it to transactions
+
+System implementation:  (System implementation)[Best if the solution is the fastest]
+        
+    1. Transactions will be saved into an array which will be saved into LocalStorage
+        1a. Each transaction is stored as an object {id: 1, title: "Phone", amount: -200}
+        1b. All the transactions are stored into an array 
+            1b. Declare an empty array {const transactions = [];}
+        1c. This array is stored into LocalStorage 
+            1c. When the program starts check if the transactions array is present in LocalStorage
+                if present get all the transactions and store them into an array {const transactions = JSON.parse(...)}
+                if not present add the array at 1b to LocalStorage{LocalStorage.setItem('transactions', JSON.stringify(...))}
+        1d Update UI (show all the transactions) showAllTransaction
+            1d. Delete all the children of historyDivElement
+            1d. For each transaction create a new HTML element with 
+                1. an id as hidden input <input type="hidden" value = transaction.id>
+                2. a title
+                3. an amout 
+                Add this element to the History div element
+        
+    
+    2. showBalance()
+        let balance = 0;
+        forEach balance += item.amount
+        Update UI (change inner text)
+    
+    3. showIncome()
+        let income = 0;
+        forEach income += item.amount > 0 ? item.amount : 0; 
+        Update UI(change inner text)
+
+    4. showExpence()
+        let expense = 0;
+        forEach income += item.amount > 0 ? item.amount : 0; 
+        Update UI(change inner text)
+
+    5. addTranscation()
+        get user input
+        get id of the last transaction 
+            let newTransation;
+            if(transactions[transactions.length-1] != undefined) -> newTransation = transactions[transactions.length-1].id + 1;
+            else newTransationId = 0
+
+        create transaction object, const newTransation = {id: newTransationId, title: userTitle, amount: userAmount};
+        add this newTransation to transactions array
+        update the LocalStorage
+
+        showAllTransaction()
+        showIncome()
+        showExpence()
+
+    6. removeTransaction()
+        get the elementId
+        removeTransactionFrom Array
+            transactions = transactions.filter(transaction => transaction.id != elementId);
+        update LocalStorage
+            LocalStorage.setItem('transactions', transactions);
+        update UI
+            showAllTransaction()
+            showIncome()
+            showExpence()
