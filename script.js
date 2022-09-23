@@ -29,14 +29,30 @@ function storeNewTransactionObject(text, value) {
   } else {
     newTransactionId = transactions[transactions.length - 1].id + 1;
   }
+
+  if (text === `` || value === 0) {
+    return alert("Please add a text and amount");
+  }
+
   const transaction = {
     id: newTransactionId,
     title: text,
     amount: value,
   };
+
   transactions.push(transaction);
 
   localStorage.setItem("transactions", JSON.stringify(transactions));
+}
+
+// Remove Transaction - Delete Btn
+function removeTransaction(e) {
+  const elementId = e.target.parentElement.children[2].value;
+  transactions = transactions.filter(
+    (transaction) => transaction.id != elementId
+  );
+  localStorage.setItem("transactions", JSON.stringify(transactions));
+  updateUI();
 }
 
 // Create New Transaction Element
@@ -45,6 +61,7 @@ function createNewTransactionElement(transaction) {
   const span = document.createElement("span");
   const button = document.createElement("button");
   const input = document.createElement("input");
+
   if (transaction.amount > 0) {
     li.classList.add("income");
     span.innerText = `+${transaction.amount}`;
@@ -52,9 +69,11 @@ function createNewTransactionElement(transaction) {
     li.classList.add("expense");
     span.innerText = transaction.amount;
   }
+
   li.innerText = transaction.title;
   button.classList.add("delete-btn");
   button.innerText = "X";
+  button.addEventListener("click", removeTransaction);
   input.type = "hidden";
   input.value = transaction.id;
   li.appendChild(span);
@@ -72,7 +91,7 @@ function showAllTransactions() {
   );
 }
 
-// Show Ialance
+// Show Balance
 function showBalance() {
   let balance = 0;
   transactions.forEach((item) => {
@@ -103,6 +122,12 @@ function showExpense() {
   moneyExpenseElement.innerText = `$${expense}`;
 }
 
+// Clear form
+function clearForm() {
+  inputTextElement.value = ``;
+  inputAmountElement.value = ``;
+}
+
 // Update UI
 function updateUI() {
   showAllTransactions();
@@ -114,6 +139,5 @@ function updateUI() {
 addTransactionBtnEl.addEventListener("click", () => {
   storeNewTransactionObject();
   updateUI();
-  inputTextElement.value = ``;
-  inputAmountElement.value = ``;
+  clearForm();
 });
