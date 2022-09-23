@@ -29,11 +29,17 @@ function storeNewTransactionObject(text, value) {
   } else {
     newTransactionId = transactions[transactions.length - 1].id + 1;
   }
+
+  if (text === `` || value === 0) {
+    return alert("Please add a text and amount");
+  }
+
   const transaction = {
     id: newTransactionId,
     title: text,
     amount: value,
   };
+
   transactions.push(transaction);
 
   localStorage.setItem("transactions", JSON.stringify(transactions));
@@ -55,6 +61,7 @@ function createNewTransactionElement(transaction) {
   const span = document.createElement("span");
   const button = document.createElement("button");
   const input = document.createElement("input");
+
   if (transaction.amount > 0) {
     li.classList.add("income");
     span.innerText = `+${transaction.amount}`;
@@ -62,6 +69,7 @@ function createNewTransactionElement(transaction) {
     li.classList.add("expense");
     span.innerText = transaction.amount;
   }
+
   li.innerText = transaction.title;
   button.classList.add("delete-btn");
   button.innerText = "X";
