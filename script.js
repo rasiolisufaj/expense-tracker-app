@@ -66,13 +66,24 @@ async function storeNewTransactionObject() {
 }
 
 // Remove Transaction - Delete Btn
-function removeTransaction(e) {
+async function removeTransaction(e) {
   const elementId = e.target.parentElement.children[2].value;
-  transactions = transactions.filter(
-    (transaction) => transaction.id != elementId
-  );
-  localStorage.setItem("transactions", JSON.stringify(transactions));
-  updateUI();
+  console.log(elementId);
+  // transactions = transactions.filter(
+  //   (transaction) => transaction.id != elementId
+  // );
+  // localStorage.setItem("transactions", JSON.stringify(transactions));
+  const response = await fetch(API_URL + "/transactions/" + elementId, {
+    method: "DELETE",
+  });
+  console.log(response.status);
+  if (response.status === 200) {
+    console.log(1);
+    transactions = transactions.filter(
+      (transaction) => transaction.id != elementId
+    );
+    // updateUI();
+  }
 }
 
 // Create New Transaction Element
@@ -93,9 +104,13 @@ function createNewTransactionElement(transaction) {
   li.innerText = transaction.title;
   button.classList.add("delete-btn");
   button.innerText = "X";
-  button.addEventListener("click", removeTransaction);
+  button.addEventListener("click", (e) => {
+    removeTransaction(e).then(() => {
+      updateUI();
+    });
+  });
   input.type = "hidden";
-  input.value = transaction.id;
+  input.value = transaction._id;
   li.appendChild(span);
   li.appendChild(button);
   li.appendChild(input);
