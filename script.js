@@ -6,53 +6,84 @@ const inputTextElement = document.getElementById("text");
 const inputAmountElement = document.getElementById("amount");
 const addTransactionBtnEl = document.getElementById("add-transaction-btn");
 
+const API_URL = "https://crudcrud.com/api/df1205722cb649a696ec433ce1c13877";
+
 let transactions = [];
 
 // Check local storage
-function checkLocalStorage() {
-  let storedTransactions = JSON.parse(localStorage.getItem("transactions"));
-  if (storedTransactions !== null) {
-    transactions = storedTransactions;
+async function getAllTransactions() {
+  // let storedTransactions = JSON.parse(localStorage.getItem("transactions"));
+  // if (storedTransactions !== null) {
+  //   transactions = storedTransactions;
+  // }
+  const response = await fetch(API_URL + "/transactions");
+  const data = await response.json();
+  if (data !== null) {
+    transactions = data;
   }
 }
 
-checkLocalStorage();
-updateUI();
+getAllTransactions().then(() => {
+  updateUI();
+});
 
 // Store New Transaction Object
-function storeNewTransactionObject(text, value) {
-  text = inputTextElement.value;
-  value = +inputAmountElement.value;
-  let newTransactionId;
-  if (transactions.length === 0) {
-    newTransactionId = 0;
-  } else {
-    newTransactionId = transactions[transactions.length - 1].id + 1;
-  }
+async function storeNewTransactionObject() {
+  const text = inputTextElement.value;
+  const value = +inputAmountElement.value;
+  // let newTransactionId;
+  // if (transactions.length === 0) {
+  //   newTransactionId = 0;
+  // } else {
+  //   newTransactionId = transactions[transactions.length - 1].id + 1;
+  // }
 
   if (text === `` || value === 0) {
     return alert("Please add a text and amount");
   }
 
   const transaction = {
-    id: newTransactionId,
+    // id: newTransactionId,
     title: text,
     amount: value,
   };
 
-  transactions.push(transaction);
+  const response = await fetch(API_URL + "/transactions", {
+    method: "POST",
+    headers: {
+      Accept: "application/json",
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(transaction),
+  });
+  if (response.status === 201) {
+    const newTransaction = await response.json();
+    transactions.push(newTransaction);
+    console.log("pushed");
+  }
 
-  localStorage.setItem("transactions", JSON.stringify(transactions));
+  // localStorage.setItem("transactions", JSON.stringify(transactions));
 }
 
 // Remove Transaction - Delete Btn
-function removeTransaction(e) {
+async function removeTransaction(e) {
   const elementId = e.target.parentElement.children[2].value;
-  transactions = transactions.filter(
-    (transaction) => transaction.id != elementId
-  );
-  localStorage.setItem("transactions", JSON.stringify(transactions));
-  updateUI();
+  console.log(elementId);
+  // transactions = transactions.filter(
+  //   (transaction) => transaction.id != elementId
+  // );
+  // localStorage.setItem("transactions", JSON.stringify(transactions));
+  const response = await fetch(API_URL + "/transactions/" + elementId, {
+    method: "DELETE",
+  });
+  console.log(response.status);
+  if (response.status === 200) {
+    console.log(1);
+    transactions = transactions.filter(
+      (transaction) => transaction.id != elementId
+    );
+    // updateUI();
+  }
 }
 
 // Create New Transaction Element
@@ -73,9 +104,13 @@ function createNewTransactionElement(transaction) {
   li.innerText = transaction.title;
   button.classList.add("delete-btn");
   button.innerText = "X";
-  button.addEventListener("click", removeTransaction);
+  button.addEventListener("click", (e) => {
+    removeTransaction(e).then(() => {
+      updateUI();
+    });
+  });
   input.type = "hidden";
-  input.value = transaction.id;
+  input.value = transaction._id;
   li.appendChild(span);
   li.appendChild(button);
   li.appendChild(input);
@@ -85,6 +120,7 @@ function createNewTransactionElement(transaction) {
 
 // Show all transactions
 function showAllTransactions() {
+  console.log(transactions);
   historyListElement.innerHTML = ``;
   transactions.forEach((transaction) =>
     createNewTransactionElement(transaction)
@@ -137,7 +173,13 @@ function updateUI() {
 }
 
 addTransactionBtnEl.addEventListener("click", () => {
-  storeNewTransactionObject();
-  updateUI();
-  clearForm();
+  storeNewTransactionObject()
+    .then(() => {
+      updateUI();
+      clearForm();
+    })
+    .catch((error) => {
+      alert(error.message);
+      clearForm();
+    });
 });
