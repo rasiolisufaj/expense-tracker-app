@@ -1,0 +1,11 @@
+1. Keeping the backend + the state + the UI syncronised.
+  a. Take the user input (btn click, text input, checkbox)
+    a1. Validation
+
+  b. Call the backend with fetch()
+    b1. check if the response is valid
+
+  c. Update the state
+    c1. change the state array
+
+  d. Update UI

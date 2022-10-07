@@ -6,43 +6,63 @@ const inputTextElement = document.getElementById("text");
 const inputAmountElement = document.getElementById("amount");
 const addTransactionBtnEl = document.getElementById("add-transaction-btn");
 
+const API_URL = "https://crudcrud.com/api/df1205722cb649a696ec433ce1c13877";
+
 let transactions = [];
 
 // Check local storage
-function checkLocalStorage() {
-  let storedTransactions = JSON.parse(localStorage.getItem("transactions"));
-  if (storedTransactions !== null) {
-    transactions = storedTransactions;
+async function getAllTransactions() {
+  // let storedTransactions = JSON.parse(localStorage.getItem("transactions"));
+  // if (storedTransactions !== null) {
+  //   transactions = storedTransactions;
+  // }
+  const response = await fetch(API_URL + "/transactions");
+  const data = await response.json();
+  if (data !== null) {
+    transactions = data;
   }
 }
 
-checkLocalStorage();
-updateUI();
+getAllTransactions().then(() => {
+  updateUI();
+});
 
 // Store New Transaction Object
-function storeNewTransactionObject(text, value) {
-  text = inputTextElement.value;
-  value = +inputAmountElement.value;
-  let newTransactionId;
-  if (transactions.length === 0) {
-    newTransactionId = 0;
-  } else {
-    newTransactionId = transactions[transactions.length - 1].id + 1;
-  }
+async function storeNewTransactionObject() {
+  const text = inputTextElement.value;
+  const value = +inputAmountElement.value;
+  // let newTransactionId;
+  // if (transactions.length === 0) {
+  //   newTransactionId = 0;
+  // } else {
+  //   newTransactionId = transactions[transactions.length - 1].id + 1;
+  // }
 
   if (text === `` || value === 0) {
     return alert("Please add a text and amount");
   }
 
   const transaction = {
-    id: newTransactionId,
+    // id: newTransactionId,
     title: text,
     amount: value,
   };
 
-  transactions.push(transaction);
+  const response = await fetch(API_URL + "/transactions", {
+    method: "POST",
+    headers: {
+      Accept: "application/json",
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(transaction),
+  });
+  if (response.status === 201) {
+    const newTransaction = await response.json();
+    transactions.push(newTransaction);
+    console.log("pushed");
+  }
 
-  localStorage.setItem("transactions", JSON.stringify(transactions));
+  // localStorage.setItem("transactions", JSON.stringify(transactions));
 }
 
 // Remove Transaction - Delete Btn
@@ -85,6 +105,7 @@ function createNewTransactionElement(transaction) {
 
 // Show all transactions
 function showAllTransactions() {
+  console.log(transactions);
   historyListElement.innerHTML = ``;
   transactions.forEach((transaction) =>
     createNewTransactionElement(transaction)
@@ -137,7 +158,13 @@ function updateUI() {
 }
 
 addTransactionBtnEl.addEventListener("click", () => {
-  storeNewTransactionObject();
-  updateUI();
-  clearForm();
+  storeNewTransactionObject()
+    .then(() => {
+      updateUI();
+      clearForm();
+    })
+    .catch((error) => {
+      alert(error.message);
+      clearForm();
+    });
 });
